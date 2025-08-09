@@ -11,8 +11,19 @@ export class MessageHub {
   }
 
   unsubscribe(key: string, listener: Function) {
-    const index = this.listenerLookup[key].indexOf(listener);
-    this.listenerLookup[key].splice(index, 1);
+    const listeners = this.listenerLookup[key];
+    if (!listeners) {
+      return;
+    }
+
+    const index = listeners.indexOf(listener);
+    if (index > -1) {
+      listeners.splice(index, 1);
+
+      if (!listeners.length) {
+        delete this.listenerLookup[key];
+      }
+    }
   }
 
   publish(key: string, ...params: Array<any>) {

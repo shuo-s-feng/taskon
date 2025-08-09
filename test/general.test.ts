@@ -72,6 +72,24 @@ describe('TaskQueue General Operations', () => {
     expect(handler2).not.toHaveBeenCalled;
   });
 
+  it('keeps existing listeners when unsubscribing non-existent handler', async () => {
+    const queue = new TaskQueue({ concurrency: 1 });
+    const handler1 = jest.fn();
+    const handler2 = jest.fn();
+
+    queue.subscribeTaskStatusChange(handler1);
+    queue.subscribeTaskStatusChange(handler2);
+
+    const nonListener = jest.fn();
+    queue.unsubscribeTaskStatusChange(nonListener);
+
+    await queue.addTask(async () => 'test', 'task1');
+
+    expect(handler1).toHaveBeenCalled();
+    expect(handler2).toHaveBeenCalled();
+    expect(nonListener).not.toHaveBeenCalled();
+  });
+
   it('retrieves task information', async () => {
     const queue = new TaskQueue({
       concurrency: 1,
